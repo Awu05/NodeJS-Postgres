@@ -1,0 +1,41 @@
+version: '3.5'
+
+services:
+  postgresql:
+    image: postgres # use latest official postgres version
+    container_name: postgres-docker
+    expose:
+      - 5432
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=appDB
+#    env_file:
+#      - database.env # configure postgres
+    volumes: # data persistance
+      - ./postgres-data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - network-bridge
+
+# Make sure that Postgres container is fully running before server can create table
+  nodeserver:
+    container_name: nodejs-server
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    expose:
+      - 3000
+    ports:
+      - 3000:3000
+    networks:
+      - network-bridge
+    links:
+      - postgresql
+    
+
+networks:
+  network-bridge:
+    name: network-bridge
